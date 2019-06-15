@@ -2,6 +2,8 @@ package matrixAnalysis;
 
 import java.util.Random;
 
+import org.jfree.data.category.DefaultCategoryDataset;
+
 public class MatrixMultiplication {
 	
 	
@@ -14,6 +16,7 @@ public class MatrixMultiplication {
 		int j = 0;
 		int g = 0;
 		int s = 0;
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
 		
 		while(true) {
 		
@@ -22,42 +25,42 @@ public class MatrixMultiplication {
 		int n = s;
 		int[][] matrixA = m.generateMatrix(n);
 		int[][] matrixB = m.generateMatrix(n);
-		
 	
 		
-		
-		
-			/*System.out.println("Result matrix"  + " is "); 
-			for (i = 0; i < matrixA.length; i++) 
-				{ 
-					for (j = 0; j < matrixA.length; j++) 
-						System.out.print( matrixA[i][j]  + " "); 
-					System.out.println(); 
-				} */
 			long startTime  = System.nanoTime();
 			m.classicMatrixMult(matrixA, matrixB, n);
 			long endTime  = System.nanoTime();
 			long timeRequired = endTime - startTime;
 			System.out.println("Total time required to run is "+" for N = "+ n +" is "+ timeRequired +" milliseconds" );
-			System.out.println();
+			dataset.addValue( timeRequired , "Size of N" , Integer.toString(n) );
 			System.out.println();
 			System.out.println();
 			
 			if(s==256) {
+			          Chart chart = new Chart(
+				         "Time Taken Vs Size of Matrix" ,
+				         "Time Taken vs Size of Matrix", dataset);
+
+				      chart.pack( );
+				     // RefineryUtilities.centerFrameOnScreen( chart );
+				      chart.setVisible( true );
 				break;
-				
+			
 			}
 			
 			
 		}
+		
 			
 	}
 	
 	
 	
+	
+	
 	private void classicMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
 		
-		//int[][] outputMatrix = new int[N][N];
+		
 		int[][] C = new int[n][n];
 
 		for (int i = 0; i < n; i++) {
