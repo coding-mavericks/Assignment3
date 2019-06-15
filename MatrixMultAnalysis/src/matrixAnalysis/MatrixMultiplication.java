@@ -6,41 +6,66 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 public class MatrixMultiplication {
 	
-	
-	
-	
 	public static void main(String args[]) {
 		MatrixMultiplication m = new MatrixMultiplication();
-		
-		int i = 0;
-		int j = 0;
-		int g = 0;
+		final int NoOfTIMES = 30;
+		int g = 1;
 		int s = 0;
+		long timeRequiredClassic= 0;
+		long timeRequiredDC = 0;
+		long timeRequiredstrassen = 0;
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
 		
 		while(true) {
-		
 		s=(int) Math.pow(2,g);
-		g=g+1;
-		int n = s;
-		int[][] matrixA = m.generateMatrix(n);
-		int[][] matrixB = m.generateMatrix(n);
-	
-		
-			long startTime  = System.nanoTime();
+		    g=g+1;
+		    int n = s;
+		    int[][] matrixA = m.generateMatrix(n);
+		    int[][] matrixB = m.generateMatrix(n);
+		    for (int j = 0; j < NoOfTIMES; j++) {
+			long startTimeClassic  = System.nanoTime();
 			m.classicMatrixMult(matrixA, matrixB, n);
-			long endTime  = System.nanoTime();
-			long timeRequired = endTime - startTime;
-			System.out.println("Total time required to run is "+" for N = "+ n +" is "+ timeRequired +" milliseconds" );
-			dataset.addValue( timeRequired , "Size of N" , Integer.toString(n) );
-			System.out.println();
-			System.out.println();
+			long endTimeClassic   = System.nanoTime();
 			
+			timeRequiredClassic+= endTimeClassic  - startTimeClassic ;
+			
+			long startTimeDC  = System.nanoTime();
+			m.divideAndConquerMatrixMult(matrixA, matrixB, n);
+			long endTimeDC  = System.nanoTime();
+			
+			timeRequiredDC += endTimeDC - startTimeDC;
+			
+			long startTimestrassen  = System.nanoTime();
+			m.strassenMatrixMult(matrixA, matrixB, n);
+			long endTimestrassen = System.nanoTime();
+			
+			timeRequiredstrassen += endTimestrassen - startTimestrassen;
+			
+			/*System.out.println("Total time required to run Classic is "+" for N = "+ n +" is "+ timeRequiredClassic +" milliseconds" );
+			System.out.println("Total time required to run Divide & Conquer is "+" for N = "+ n +" is "+ timeRequiredDC +" milliseconds" );
+			System.out.println("Total time required to run Strassen's is "+" for N = "+ n +" is "+ timeRequiredstrassen +" milliseconds" );
+			
+			//dataset.addValue( timeRequiredClassic , "Size of N" , Integer.toString(n) );
+			System.out.println();
+			System.out.println();*/
+		    }
+		    timeRequiredClassic = timeRequiredClassic / NoOfTIMES;
+		    timeRequiredDC = timeRequiredDC / NoOfTIMES;
+			timeRequiredstrassen = timeRequiredstrassen / NoOfTIMES;
+
+			System.out
+					.println("For n="
+							+ n
+							+ ": \n\tClassic Matrix Multiplication time: "
+							+ timeRequiredClassic
+							+ " nanoseconds.\n\tDivide and Conquer Matrix Multiplication time: "
+							+ timeRequiredDC
+							+ " nanoseconds.\n\tStrassen's Matrix Multiplication time: "
+							+ timeRequiredstrassen + " nanoseconds.\n");
 			if(s==256) {
 			          Chart chart = new Chart(
 				         "Time Taken Vs Size of Matrix" ,
 				         "Time Taken vs Size of Matrix", dataset);
-
 				      chart.pack( );
 				     // RefineryUtilities.centerFrameOnScreen( chart );
 				      chart.setVisible( true );
@@ -51,7 +76,7 @@ public class MatrixMultiplication {
 			
 		}
 		
-			
+	
 	}
 	
 	
@@ -82,13 +107,177 @@ public class MatrixMultiplication {
 				for( int k = 0; k < N; k += 1 )
 					outputMatrix[i][j] += matrixA[i][k] * matrixB[k][j];
 			}*/
-		System.out.println("Matrix multiplication done");
+		//System.out.println("Matrix multiplication done");
 		
 	}
+	public int[][] divideAndConquerMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
+		int[][] matrixC = new int[n][n];
 
+		if (n == 1) {
+			matrixC[0][0] = matrixA[0][0] * matrixB[0][0];
+			return matrixC;
+		} else {
+			int[][] A11 = new int[n / 2][n / 2];
+			int[][] A12 = new int[n / 2][n / 2];
+			int[][] A21 = new int[n / 2][n / 2];
+			int[][] A22 = new int[n / 2][n / 2];
+			int[][] B11 = new int[n / 2][n / 2];
+			int[][] B12 = new int[n / 2][n / 2];
+			int[][] B21 = new int[n / 2][n / 2];
+			int[][] B22 = new int[n / 2][n / 2];
 
+			split(matrixA, A11, 0, 0);
+			split(matrixA, A12, 0, n / 2);
+			split(matrixA, A21, n / 2, 0);
+			split(matrixA, A22, n / 2, n / 2);
+			split(matrixB, B11, 0, 0);
+			split(matrixB, B12, 0, n / 2);
+			split(matrixB, B21, n / 2, 0);
+			split(matrixB, B22, n / 2, n / 2);
 
-	public static int[][] generateMatrix(int n) {
+			int[][] C11 = addMatrix(divideAndConquerMatrixMult(A11, B11, n / 2),
+					divideAndConquerMatrixMult(A12, B21, n / 2), n / 2);
+			int[][] C12 = addMatrix(divideAndConquerMatrixMult(A11, B12, n / 2),
+					divideAndConquerMatrixMult(A12, B22, n / 2), n / 2);
+			int[][] C21 = addMatrix(divideAndConquerMatrixMult(A21, B11, n / 2),
+					divideAndConquerMatrixMult(A22, B21, n / 2), n / 2);
+			int[][] C22 = addMatrix(divideAndConquerMatrixMult(A21, B12, n / 2),
+					divideAndConquerMatrixMult(A22, B22, n / 2), n / 2);
+
+			combine(C11, matrixC, 0, 0);
+			combine(C12, matrixC, 0, n / 2);
+			combine(C21, matrixC, n / 2, 0);
+			combine(C22, matrixC, n / 2, n / 2);
+		}
+
+		return matrixC;
+	}
+	public int[][] strassenMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
+		int[][] C = new int[n][n];
+		strassenMatrixMultFormula(matrixA, matrixB, C, n);
+		return C;
+	}
+	public void strassenMatrixMultFormula(int[][] matrixA, int[][] matrixB, int[][] matrixC, int n) {
+
+		if (n == 2) {
+			matrixC[0][0] = (matrixA[0][0] * matrixB[0][0]) + (matrixA[0][1] * matrixB[1][0]);
+			matrixC[0][1] = (matrixA[0][0] * matrixB[0][1]) + (matrixA[0][1] * matrixB[1][1]);
+			matrixC[1][0] = (matrixA[1][0] * matrixB[0][0]) + (matrixA[1][1] * matrixB[1][0]);
+			matrixC[1][1] = (matrixA[1][0] * matrixB[0][1]) + (matrixA[1][1] * matrixB[1][1]);
+		} else {
+			int[][] matrixA11 = new int[n / 2][n / 2];
+			int[][] matrixA12 = new int[n / 2][n / 2];
+			int[][] matrixA21 = new int[n / 2][n / 2];
+			int[][] matrixA22 = new int[n / 2][n / 2];
+			int[][] matrixB11 = new int[n / 2][n / 2];
+			int[][] matrixB12 = new int[n / 2][n / 2];
+			int[][] matrixB21 = new int[n / 2][n / 2];
+			int[][] matrixB22 = new int[n / 2][n / 2];
+
+			int[][] matrixP = new int[n / 2][n / 2];
+			int[][] matrixQ = new int[n / 2][n / 2];
+			int[][] matrixR = new int[n / 2][n / 2];
+			int[][] matrixS = new int[n / 2][n / 2];
+			int[][] matrixT = new int[n / 2][n / 2];
+			int[][] matrixU = new int[n / 2][n / 2];
+			int[][] matrixV = new int[n / 2][n / 2];
+
+			split(matrixA, matrixA11, 0, 0);
+			split(matrixA, matrixA12, 0, n / 2);
+			split(matrixA, matrixA21, n / 2, 0);
+			split(matrixA, matrixA22, n / 2, n / 2);
+			split(matrixB, matrixB11, 0, 0);
+			split(matrixB, matrixB12, 0, n / 2);
+			split(matrixB, matrixB21, n / 2, 0);
+			split(matrixB, matrixB22, n / 2, n / 2);
+
+			strassenMatrixMultFormula(addMatrix(matrixA11, matrixA22, n / 2),
+					addMatrix(matrixB11, matrixB22, n / 2), matrixP, n / 2);
+			strassenMatrixMultFormula(addMatrix(matrixA21, matrixA22, n / 2), matrixB11, matrixQ, n / 2);
+			strassenMatrixMultFormula(matrixA11, subtractMatrix(matrixB12, matrixB22, n / 2), matrixR, n / 2);
+			strassenMatrixMultFormula(matrixA22, subtractMatrix(matrixB21, matrixB11, n / 2), matrixS, n / 2);
+			strassenMatrixMultFormula(addMatrix(matrixA11, matrixA12, n / 2), matrixB22, matrixT, n / 2);
+			strassenMatrixMultFormula(subtractMatrix(matrixA21, matrixA11, n / 2),
+					addMatrix(matrixB11, matrixB12, n / 2), matrixU, n / 2);
+			strassenMatrixMultFormula(subtractMatrix(matrixA12, matrixA22, n / 2),
+					addMatrix(matrixB21, matrixB22, n / 2), matrixV, n / 2);
+
+			int[][] C11 = addMatrix(
+					subtractMatrix(addMatrix(matrixP, matrixS, matrixP.length), matrixT, matrixT.length), matrixV,
+					matrixV.length);
+			int[][] C12 = addMatrix(matrixR, matrixT, matrixR.length);
+			int[][] C21 = addMatrix(matrixQ, matrixS, matrixQ.length);
+			int[][] C22 = addMatrix(
+					subtractMatrix(addMatrix(matrixP, matrixR, matrixP.length), matrixQ, matrixQ.length), matrixU,
+					matrixU.length);
+
+			combine(C11, matrixC, 0, 0);
+			combine(C12, matrixC, 0, n / 2);
+			combine(C21, matrixC, n / 2, 0);
+			combine(C22, matrixC, n / 2, n / 2);
+		}
+	}
+	private void split(int[][] initial_Matrix,
+			int[][] new_Matrix, int m, int n) {
+		int y = n;
+		for (int i = 0; i < new_Matrix.length; i++) {
+			for (int j = 0; j < new_Matrix.length; j++) {
+				new_Matrix[i][j] = initial_Matrix[m][y++];
+			}
+			y = n;
+			m++;
+		}
+	}
+	/**
+	 * Creates a new matrix based off of part of another matrix
+	 * 
+	 * @param initial_Matrix---
+	 *            the initial matrix
+	 * @param new_Matrix---
+	 *            the new matrix created from the initial matrix
+	 * @param m----
+	 *            the initial row position of initialMatrix used when creating
+	 *            newMatrix
+	 * @param n---
+	 *            the initial column position of initialMatrix used when
+	 *            creating newMatrix
+	 */
+	private void combine(int[][] initial_Matrix,
+			int[][] new_Matrix, int m, int n) {
+
+		int y = n;
+
+		for (int i = 0; i < initial_Matrix.length; i++) {
+			for (int j = 0; j < initial_Matrix.length; j++) {
+				new_Matrix[m][y++] = initial_Matrix[i][j];
+			}
+			y = n;
+			m++;
+		}
+	}
+	private int[][] addMatrix(int[][] matrixA, int[][] matrixB, int n) {
+
+		int[][] matrixC = new int[n][n];
+
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				matrixC[i][j] = matrixA[i][j] + matrixB[i][j];
+			}
+		}
+		return matrixC;
+	}
+	private int[][] subtractMatrix(int[][] matrixA, int[][] matrixB, int n) {
+
+		int[][] matrixC = new int[n][n];
+
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				matrixC[i][j] = matrixA[i][j] - matrixB[i][j];
+			}
+		}
+		return matrixC;
+	}
+	public int[][] generateMatrix(int n) {
 		Random r = new Random();
 		int[][] matrix = new int[n][n];
 
@@ -99,5 +288,6 @@ public class MatrixMultiplication {
 		}
 		return matrix;
 	}
+	
 
 }
