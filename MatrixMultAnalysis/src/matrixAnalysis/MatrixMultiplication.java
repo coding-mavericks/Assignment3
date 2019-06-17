@@ -13,7 +13,9 @@ public class MatrixMultiplication {
 		final int NoOfTIMES = 1;
 		int g = 1;
 		int s = 0;
+
 		long timeRequiredClassic= 0;
+		long timeRequiredBlock=0;
 		long timeRequiredDC = 0;
 		long timeRequiredstrassen = 0;
 		XYSeriesCollection dataset = new XYSeriesCollection();
@@ -25,18 +27,57 @@ public class MatrixMultiplication {
 		DefaultCategoryDataset datasetStra = new DefaultCategoryDataset( );*/
 		while(true) {
 		s=(int) Math.pow(2,g);
-			//s=8192;
+			
 		    g=g+1;
 		    int n = s;
 		    int[][] matrixA = m.generateMatrix(n);
 		    int[][] matrixB = m.generateMatrix(n);
+		    
 		    for (int j = 0; j < NoOfTIMES; j++) {
+		    	
+		    	
 			long startTimeClassic  = System.nanoTime();
-			m.classicMatrixMult(matrixA, matrixB, n);
+		    int[][] c = m.classicMatrixMult(matrixA, matrixB, n);
 			long endTimeClassic   = System.nanoTime();
 			
+
 			timeRequiredClassic+= endTimeClassic  - startTimeClassic ;
 			
+			
+			long startTimeBlock  = System.nanoTime();
+			int[][] d = m.blockMatrix(matrixA, matrixB, n);
+			long endTimeBlock   = System.nanoTime();			
+			timeRequiredBlock+= endTimeBlock  - startTimeBlock ;
+			
+			int flag = 0;
+			for( int i = 0; i < n; i += 1 ) {
+				for( int j2 = 0; j2 < n; j2 += 1 ) {
+				
+					if(c[i][j2] != d[i][j2]) {
+						System.out.println("matrix is not equal");
+						flag = 1;
+					}
+				}
+			//System.out.println();
+			}
+			if (flag == 0) {
+				System.out.println("matrix is equal");
+			}
+			
+			
+			
+	/*		for( int i = 0; i < n; i += 1 ) {
+				for( int j1 = 0; j1 < n; j1 += 1 ) {
+				
+					
+					System.out.println(d[i][j1]+ " ");
+				}
+			//System.out.println();
+			}*/
+			
+			
+			
+			/*
 			
 			long startTimeDC  = System.nanoTime();
 			m.divideAndConquerMatrixMult(matrixA, matrixB, n);
@@ -48,7 +89,7 @@ public class MatrixMultiplication {
 			m.strassenMatrixMult(matrixA, matrixB, n);
 			long endTimestrassen = System.nanoTime();
 			
-			timeRequiredstrassen += endTimestrassen - startTimestrassen;
+			timeRequiredstrassen += endTimestrassen - startTimestrassen;*/
 			
 			//System.out.println("Total time required to run Classic is "+" for N = "+ n +" is "+ timeRequiredClassic +" milliseconds" );
 			//System.out.println("Total time required to run Divide & Conquer is "+" for N = "+ n +" is "+ timeRequiredDC +" milliseconds" );
@@ -59,23 +100,32 @@ public class MatrixMultiplication {
 			//System.out.println();
 		    }
 		    timeRequiredClassic = timeRequiredClassic / NoOfTIMES/1000000;
-		    timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
-			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;
+		    timeRequiredBlock = timeRequiredBlock / NoOfTIMES/1000000;
+		   /* timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
+			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;*/
 			
 			series1.add(n,timeRequiredClassic);
-			series2.add(n,timeRequiredDC);
-			series3.add(n,timeRequiredstrassen);
+			series2.add(n,timeRequiredBlock);
+			//series3.add(n,timeRequiredstrassen);
+			
+			
+			
+		
 			
 			System.out
 					.println("For n="
 							+ n
 							+ ": \n\tClassic Matrix Multiplication time: "
 							+ timeRequiredClassic
-							+ " nanoseconds.\n\tDivide and Conquer Matrix Multiplication time: "
-							+ timeRequiredDC
+							+ " nanoseconds.\n\t BlOCK: "
+							+ timeRequiredBlock
 							+ " nanoseconds.\n\tStrassen's Matrix Multiplication time: "
 							+ timeRequiredstrassen + " nanoseconds.\n");
-			if(s==512) {
+			
+			
+			
+			
+			if(s==1024) {
 				    dataset.addSeries(series1);
 				    dataset.addSeries(series2);
 				    dataset.addSeries(series3);
@@ -100,7 +150,7 @@ public class MatrixMultiplication {
 	
 	
 	
-	private void classicMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
+	private int[][] classicMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
 		
 		
 		int[][] C = new int[n][n];
@@ -118,15 +168,42 @@ public class MatrixMultiplication {
 				}
 			}
 		}
-		/*for( int i = 0; i < N; i += 1 )
-			for( int j = 0; j < N; j += 1 ) {
-				outputMatrix[i][j] = 0;
-				for( int k = 0; k < N; k += 1 )
-					outputMatrix[i][j] += matrixA[i][k] * matrixB[k][j];
-			}*/
-		//System.out.println("Matrix multiplication done");
+		
+       return C;
+	}
+		
+		
+	
+	
+	private int[][]  blockMatrix(int[][] matrixA , int [][] matrixB , int n) {
+	    int MATRIX_SIZE = n;
+	    int block_size = 0;
+	    int[][] product = new int[n][n];
+	    if (n == 1024)
+	    	    block_size = 256;
+		for (int k = 0; k < MATRIX_SIZE; k += block_size)
+			for (int j = 0; j < MATRIX_SIZE; j += block_size)
+				for (int i = 0; i < MATRIX_SIZE; ++i)
+					for (int jj = j; jj < min(j + block_size, MATRIX_SIZE); ++jj)
+						for (int kk = k; kk < min(k + block_size, MATRIX_SIZE); ++kk)
+							product[i][jj] += matrixA[i][kk] * matrixB[kk][jj];
+		
+		
+		return product;
+		
+	
+	}
+	
+	public int min(int A , int B) {
+	if(A<B) {
+		return A;
+	}else {
+		return B;
+	}
 		
 	}
+	
+	
 	public int[][] divideAndConquerMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
 		int[][] matrixC = new int[n][n];
 
