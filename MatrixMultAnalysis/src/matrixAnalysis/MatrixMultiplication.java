@@ -3,21 +3,29 @@ package matrixAnalysis;
 import java.util.Random;
 
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 public class MatrixMultiplication {
 	
 	public static void main(String args[]) {
 		MatrixMultiplication m = new MatrixMultiplication();
-		final int NoOfTIMES = 30;
+		final int NoOfTIMES = 1;
 		int g = 1;
 		int s = 0;
 		long timeRequiredClassic= 0;
 		long timeRequiredDC = 0;
 		long timeRequiredstrassen = 0;
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
-		
+		XYSeriesCollection dataset = new XYSeriesCollection();
+		    XYSeries series1 = new XYSeries("Classic Matrix");
+		    XYSeries series2 = new XYSeries("Divide and Conquer");
+		    XYSeries series3 = new XYSeries("Strassens");
+		/*DefaultCategoryDataset datasetClassic = new DefaultCategoryDataset( );
+		DefaultCategoryDataset datasetDC = new DefaultCategoryDataset( );
+		DefaultCategoryDataset datasetStra = new DefaultCategoryDataset( );*/
 		while(true) {
 		s=(int) Math.pow(2,g);
+			//s=8192;
 		    g=g+1;
 		    int n = s;
 		    int[][] matrixA = m.generateMatrix(n);
@@ -28,6 +36,7 @@ public class MatrixMultiplication {
 			long endTimeClassic   = System.nanoTime();
 			
 			timeRequiredClassic+= endTimeClassic  - startTimeClassic ;
+			
 			
 			long startTimeDC  = System.nanoTime();
 			m.divideAndConquerMatrixMult(matrixA, matrixB, n);
@@ -41,18 +50,22 @@ public class MatrixMultiplication {
 			
 			timeRequiredstrassen += endTimestrassen - startTimestrassen;
 			
-			/*System.out.println("Total time required to run Classic is "+" for N = "+ n +" is "+ timeRequiredClassic +" milliseconds" );
-			System.out.println("Total time required to run Divide & Conquer is "+" for N = "+ n +" is "+ timeRequiredDC +" milliseconds" );
-			System.out.println("Total time required to run Strassen's is "+" for N = "+ n +" is "+ timeRequiredstrassen +" milliseconds" );
+			//System.out.println("Total time required to run Classic is "+" for N = "+ n +" is "+ timeRequiredClassic +" milliseconds" );
+			//System.out.println("Total time required to run Divide & Conquer is "+" for N = "+ n +" is "+ timeRequiredDC +" milliseconds" );
+			//System.out.println("Total time required to run Strassen's is "+" for N = "+ n +" is "+ timeRequiredstrassen +" milliseconds" );
 			
 			//dataset.addValue( timeRequiredClassic , "Size of N" , Integer.toString(n) );
-			System.out.println();
-			System.out.println();*/
+			//System.out.println();
+			//System.out.println();
 		    }
-		    timeRequiredClassic = timeRequiredClassic / NoOfTIMES;
-		    timeRequiredDC = timeRequiredDC / NoOfTIMES;
-			timeRequiredstrassen = timeRequiredstrassen / NoOfTIMES;
-
+		    timeRequiredClassic = timeRequiredClassic / NoOfTIMES/1000000;
+		    timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
+			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;
+			
+			series1.add(n,timeRequiredClassic);
+			series2.add(n,timeRequiredDC);
+			series3.add(n,timeRequiredstrassen);
+			
 			System.out
 					.println("For n="
 							+ n
@@ -62,13 +75,17 @@ public class MatrixMultiplication {
 							+ timeRequiredDC
 							+ " nanoseconds.\n\tStrassen's Matrix Multiplication time: "
 							+ timeRequiredstrassen + " nanoseconds.\n");
-			if(s==256) {
+			if(s==512) {
+				    dataset.addSeries(series1);
+				    dataset.addSeries(series2);
+				    dataset.addSeries(series3);
+				
 			          Chart chart = new Chart(
 				         "Time Taken Vs Size of Matrix" ,
 				         "Time Taken vs Size of Matrix", dataset);
 				      chart.pack( );
 				     // RefineryUtilities.centerFrameOnScreen( chart );
-				      chart.setVisible( true );
+				      chart.setVisible( true ); 
 				break;
 			
 			}
@@ -217,6 +234,8 @@ public class MatrixMultiplication {
 			combine(C22, matrixC, n / 2, n / 2);
 		}
 	}
+	
+	
 	private void split(int[][] initial_Matrix,
 			int[][] new_Matrix, int m, int n) {
 		int y = n;
@@ -255,6 +274,7 @@ public class MatrixMultiplication {
 			m++;
 		}
 	}
+	
 	private int[][] addMatrix(int[][] matrixA, int[][] matrixB, int n) {
 
 		int[][] matrixC = new int[n][n];
@@ -266,6 +286,7 @@ public class MatrixMultiplication {
 		}
 		return matrixC;
 	}
+	
 	private int[][] subtractMatrix(int[][] matrixA, int[][] matrixB, int n) {
 
 		int[][] matrixC = new int[n][n];
@@ -277,6 +298,8 @@ public class MatrixMultiplication {
 		}
 		return matrixC;
 	}
+	
+	
 	public int[][] generateMatrix(int n) {
 		Random r = new Random();
 		int[][] matrix = new int[n][n];

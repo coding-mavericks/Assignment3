@@ -18,8 +18,10 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
+import org.jfree.data.xy.XYSeriesCollection;
 //import org.jfree.data.category.DefaultCategoryDataset;
 
 public class Chart extends JFrame {
@@ -31,16 +33,18 @@ public class Chart extends JFrame {
 	private JPanel contentPane;
 
 
-	public Chart( String applicationTitle , String chartTitle, DefaultCategoryDataset dataset ) {
+	public Chart( String applicationTitle , String chartTitle, XYSeriesCollection dataset) {
 	      super(applicationTitle);
-	      JFreeChart lineChart = ChartFactory.createLineChart(
+	      JFreeChart lineChart = ChartFactory.createXYLineChart(
 	         chartTitle,
 	         "Size of Matrix","Time Taken",
 	         dataset,
 	         PlotOrientation.VERTICAL,
 	         true,true,false);
+	      
 	         
-	      ChartPanel chartPanel = new ChartPanel( lineChart );
+	      //boolean linechartDC;
+		ChartPanel chartPanel = new ChartPanel( lineChart );
 	      chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
 	      setContentPane( chartPanel );
 	   }
