@@ -1,7 +1,9 @@
 package matrixAnalysis;
 
 import java.util.Random;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -10,7 +12,7 @@ public class MatrixMultiplication {
 	
 	public static void main(String args[]) {
 		MatrixMultiplication m = new MatrixMultiplication();
-		final int NoOfTIMES = 1;
+		final int NoOfTIMES = 3;
 		int g = 1;
 		int s = 0;
 
@@ -18,6 +20,7 @@ public class MatrixMultiplication {
 		long timeRequiredBlock=0;
 		long timeRequiredDC = 0;
 		long timeRequiredstrassen = 0;
+		long timeRequiredClassicThread=0;
 		XYSeriesCollection dataset = new XYSeriesCollection();
 		    XYSeries series1 = new XYSeries("Classic Matrix");
 		    XYSeries series2 = new XYSeries("Divide and Conquer");
@@ -32,10 +35,12 @@ public class MatrixMultiplication {
 		    int n = s;
 		    int[][] matrixA = m.generateMatrix(n);
 		    int[][] matrixB = m.generateMatrix(n);
+		    int [][] matrixC = new int[n][n];
+		    
 		    
 		    for (int j = 0; j < NoOfTIMES; j++) {
 		    	
-		    	
+		    //System.out.println("1");
 			long startTimeClassic  = System.nanoTime();
 		    int[][] c = m.classicMatrixMult(matrixA, matrixB, n);
 			long endTimeClassic   = System.nanoTime();
@@ -43,53 +48,32 @@ public class MatrixMultiplication {
 
 			timeRequiredClassic+= endTimeClassic  - startTimeClassic ;
 			
-			
-			long startTimeBlock  = System.nanoTime();
-			int[][] d = m.blockMatrix(matrixA, matrixB, n);
-			long endTimeBlock   = System.nanoTime();			
-			timeRequiredBlock+= endTimeBlock  - startTimeBlock ;
-			
-			int flag = 0;
-			for( int i = 0; i < n; i += 1 ) {
-				for( int j2 = 0; j2 < n; j2 += 1 ) {
-				
-					if(c[i][j2] != d[i][j2]) {
-						System.out.println("matrix is not equal");
-						flag = 1;
-					}
-				}
-			//System.out.println();
-			}
-			if (flag == 0) {
-				System.out.println("matrix is equal");
-			}
+//			System.out.println("1");
+//			long startTimeBlock  = System.nanoTime();
+//			int[][] d = m.blockMatrix(matrixA, matrixB, n);
+//			long endTimeBlock   = System.nanoTime();			
+//			timeRequiredBlock+= endTimeBlock  - startTimeBlock ;
 			
 			
-			
-	/*		for( int i = 0; i < n; i += 1 ) {
-				for( int j1 = 0; j1 < n; j1 += 1 ) {
-				
-					
-					System.out.println(d[i][j1]+ " ");
-				}
-			//System.out.println();
-			}*/
-			
-			
-			
-			/*
-			
+			//System.out.println("1");
 			long startTimeDC  = System.nanoTime();
-			m.divideAndConquerMatrixMult(matrixA, matrixB, n);
+			//m.divideAndConquerMatrixMult(matrixA, matrixB, n);
 			long endTimeDC  = System.nanoTime();
 			
 			timeRequiredDC += endTimeDC - startTimeDC;
-			
+			//System.out.println("1");
 			long startTimestrassen  = System.nanoTime();
-			m.strassenMatrixMult(matrixA, matrixB, n);
+			//m.strassenMatrixMult(matrixA, matrixB, n);
 			long endTimestrassen = System.nanoTime();
 			
-			timeRequiredstrassen += endTimestrassen - startTimestrassen;*/
+			timeRequiredstrassen += endTimestrassen - startTimestrassen;
+			
+			//System.out.println("1");
+			long startTimeClassicThread = System.nanoTime();
+			m.classicThreadImp(matrixA, matrixB,matrixC, n);
+			long endTimeClassicThread = System.nanoTime();
+			
+			timeRequiredClassicThread += endTimeClassicThread - startTimeClassicThread;
 			
 			//System.out.println("Total time required to run Classic is "+" for N = "+ n +" is "+ timeRequiredClassic +" milliseconds" );
 			//System.out.println("Total time required to run Divide & Conquer is "+" for N = "+ n +" is "+ timeRequiredDC +" milliseconds" );
@@ -101,12 +85,13 @@ public class MatrixMultiplication {
 		    }
 		    timeRequiredClassic = timeRequiredClassic / NoOfTIMES/1000000;
 		    timeRequiredBlock = timeRequiredBlock / NoOfTIMES/1000000;
-		   /* timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
-			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;*/
+		    timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
+			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;
+			timeRequiredClassicThread = timeRequiredClassicThread/NoOfTIMES/1000000;
 			
 			series1.add(n,timeRequiredClassic);
 			series2.add(n,timeRequiredBlock);
-			//series3.add(n,timeRequiredstrassen);
+			series3.add(n,timeRequiredstrassen);
 			
 			
 			
@@ -115,12 +100,17 @@ public class MatrixMultiplication {
 			System.out
 					.println("For n="
 							+ n
-							+ ": \n\tClassic Matrix Multiplication time: "
+							+ ": \n\t Classic Matrix Multiplication time: "
 							+ timeRequiredClassic
-							+ " nanoseconds.\n\t BlOCK: "
+							+ " milliseconds.\n\t BlOCK: "
 							+ timeRequiredBlock
-							+ " nanoseconds.\n\tStrassen's Matrix Multiplication time: "
-							+ timeRequiredstrassen + " nanoseconds.\n");
+							+ " milliseconds.\n\t Strassen's Matrix Multiplication time: "
+							+ timeRequiredstrassen
+							+ "milliseconds.\n\t Divide and Conquer: "
+							+ timeRequiredDC
+							+ "milliseconds.\n\t Classic with Thread "
+							+ timeRequiredClassicThread
+							);
 			
 			
 			
@@ -389,5 +379,119 @@ public class MatrixMultiplication {
 		return matrix;
 	}
 	
+	public void printMatrix(int [][] matrixC)
+	{
+		for (int i = 0; i < matrixC.length; i++) {
+			for (int j = 0; j < matrixC.length; j++) {
+				System.out.print(matrixC[i][j]+" ") ;
+			}
+			System.out.println();
+		}
+		
+		System.out.println();
+		System.out.println();
+	}
+	
+	
+	public void classicThreadImp(int[][] matrixA, int[][] matrixB, int [][] matrixC, int n)
+	{
+		//MatrixMultiplication ob = new MatrixMultiplication();
+		
+        /*** Commented Below code as printing huge matrix takes long time ***/
 
+		
+        long startTime = System.currentTimeMillis();
+
+        // This method is for matrix multiplication without multithreading  
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            //System.out.println(" \nExecution time of matrixMultiply function is : "+ elapsedTime +"ms\n");
+    ///       printMatrix(A);
+    /*** Commented Below code as printing huge matrix takes long time ***/
+
+            //System.out.print(" \nPrint Matrix C without multithreading:\n\n");
+            //printMatrix( C);
+
+
+
+    /*** Below code is for matrix multiplication using multithreading ****/
+
+
+            try{
+
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            startTime = System.currentTimeMillis();
+            for(int i=0;i<n;i++)
+            {
+                for(int j=0;j<n;j++)
+                {
+                	//System.out.println("i"+i+"j"+j);
+                    RunnableC ob1 = new RunnableC(matrixA,  matrixB, matrixC, i,j, this, n);
+                    executor.execute(ob1);
+                }
+            }
+
+             executor.shutdown();
+             while (!executor.isTerminated()) {
+            }
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            stopTime = System.currentTimeMillis();
+            elapsedTime = stopTime - startTime;
+            //System.out.println(" \nExecution time of matrixMultiply function  using multithreadingis : "+ elapsedTime +"ms\n");
+            }catch(Exception e)
+            {
+
+            }
+            
+            
+
+    }
+
+    
+	
+
+}
+
+
+
+
+class RunnableC implements Runnable
+{
+    int i,j;
+    MatrixMultiplication ob;
+    int [][] A;
+    int [][] B;
+    int [][] C;
+    int n;
+    RunnableC(int [][]matrixA, int [][]matrixB,int [][] matrixC,int ii, int jj, MatrixMultiplication o, int n)
+    {
+
+        i=ii;
+        j=jj;
+        A=matrixA;
+        B=matrixB;
+        C=matrixC;
+        this.n=n;
+    }
+
+    /*** Below code of run method is performing matrix multiplication for Each cell  and placing output in the resultant
+        matrix D  ***/  
+
+     public void run()
+    {
+
+        int sum=0;
+
+        for(int k=0;k<n;k++)
+        {
+        	//System.out.print("i"+i+"j"+j+"k"+k);
+            sum+=A[i][k]*B[k][j];
+            //System.out.print(A[i][k]+"___"+B[k][j]+"++ ");
+            //System.out.println();
+        }
+
+        C[i][j]=sum;
+        
+       
+    }
 }
