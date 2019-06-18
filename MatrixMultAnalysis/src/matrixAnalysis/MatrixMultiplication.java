@@ -23,8 +23,10 @@ public class MatrixMultiplication {
 		long timeRequiredClassicThread=0;
 		XYSeriesCollection dataset = new XYSeriesCollection();
 		    XYSeries series1 = new XYSeries("Classic Matrix");
-		    XYSeries series2 = new XYSeries("Divide and Conquer");
-		    XYSeries series3 = new XYSeries("Strassens");
+		    XYSeries series2 = new XYSeries("Block Matrix");
+		    XYSeries series3 = new XYSeries("Divide and Conquer");
+		    XYSeries series4 = new XYSeries("Strassens Matrix");
+		    XYSeries series5 = new XYSeries("Classic Thread Matrix");
 		/*DefaultCategoryDataset datasetClassic = new DefaultCategoryDataset( );
 		DefaultCategoryDataset datasetDC = new DefaultCategoryDataset( );
 		DefaultCategoryDataset datasetStra = new DefaultCategoryDataset( );*/
@@ -42,31 +44,33 @@ public class MatrixMultiplication {
 		    	
 		    //System.out.println("1");
 			long startTimeClassic  = System.nanoTime();
-		    int[][] c = m.classicMatrixMult(matrixA, matrixB, n);
+		    m.classicMatrixMult(matrixA, matrixB, n);
 			long endTimeClassic   = System.nanoTime();
-			
-
 			timeRequiredClassic+= endTimeClassic  - startTimeClassic ;
 			
-//			System.out.println("1");
-//			long startTimeBlock  = System.nanoTime();
-//			int[][] d = m.blockMatrix(matrixA, matrixB, n);
-//			long endTimeBlock   = System.nanoTime();			
-//			timeRequiredBlock+= endTimeBlock  - startTimeBlock ;
+
+	
+
 			
-			
-			//System.out.println("1");
+			long startTimeBlock  = System.nanoTime();
+			m.blockMatrix(matrixA, matrixB, n);
+			long endTimeBlock   = System.nanoTime();			
+			timeRequiredBlock+= endTimeBlock  - startTimeBlock ;
+
+
+
 			long startTimeDC  = System.nanoTime();
-			//m.divideAndConquerMatrixMult(matrixA, matrixB, n);
+			m.divideAndConquerMatrixMult(matrixA, matrixB, n);
 			long endTimeDC  = System.nanoTime();
 			
 			timeRequiredDC += endTimeDC - startTimeDC;
 			//System.out.println("1");
 			long startTimestrassen  = System.nanoTime();
-			//m.strassenMatrixMult(matrixA, matrixB, n);
+			m.strassenMatrixMult(matrixA, matrixB, n);
 			long endTimestrassen = System.nanoTime();
 			
 			timeRequiredstrassen += endTimestrassen - startTimestrassen;
+
 			
 			//System.out.println("1");
 			long startTimeClassicThread = System.nanoTime();
@@ -74,6 +78,7 @@ public class MatrixMultiplication {
 			long endTimeClassicThread = System.nanoTime();
 			
 			timeRequiredClassicThread += endTimeClassicThread - startTimeClassicThread;
+
 			
 			//System.out.println("Total time required to run Classic is "+" for N = "+ n +" is "+ timeRequiredClassic +" milliseconds" );
 			//System.out.println("Total time required to run Divide & Conquer is "+" for N = "+ n +" is "+ timeRequiredDC +" milliseconds" );
@@ -87,11 +92,17 @@ public class MatrixMultiplication {
 		    timeRequiredBlock = timeRequiredBlock / NoOfTIMES/1000000;
 		    timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
 			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;
+
 			timeRequiredClassicThread = timeRequiredClassicThread/NoOfTIMES/1000000;
+			
+
 			
 			series1.add(n,timeRequiredClassic);
 			series2.add(n,timeRequiredBlock);
-			series3.add(n,timeRequiredstrassen);
+			series3.add(n,timeRequiredDC);
+			series4.add(n,timeRequiredstrassen);
+			series5.add(n,timeRequiredClassicThread);
+
 			
 			
 			
@@ -102,6 +113,7 @@ public class MatrixMultiplication {
 							+ n
 							+ ": \n\t Classic Matrix Multiplication time: "
 							+ timeRequiredClassic
+
 							+ " milliseconds.\n\t BlOCK: "
 							+ timeRequiredBlock
 							+ " milliseconds.\n\t Strassen's Matrix Multiplication time: "
@@ -110,15 +122,25 @@ public class MatrixMultiplication {
 							+ timeRequiredDC
 							+ "milliseconds.\n\t Classic with Thread "
 							+ timeRequiredClassicThread
-							);
+							
+
+							+ " milliseconds.\n\t Block Matrix Multiplication time: "
+							+ timeRequiredBlock
+							+ "milliseconds.\\n\\t Divide and Conquer Matrix Multiplication time:"
+							+ timeRequiredDC
+							+ "milliseconds.\n\tStrassen's Matrix Multiplication time in milliseconds: "
+							+ timeRequiredstrassen + " nanoseconds.\n");
+
 			
 			
 			
 			
-			if(s==1024) {
+			if(s == 512) {
 				    dataset.addSeries(series1);
 				    dataset.addSeries(series2);
 				    dataset.addSeries(series3);
+				    dataset.addSeries(series4);
+				    dataset.addSeries(series5);
 				
 			          Chart chart = new Chart(
 				         "Time Taken Vs Size of Matrix" ,
@@ -132,6 +154,7 @@ public class MatrixMultiplication {
 			
 			
 		}
+		
 		
 	
 	}
@@ -169,8 +192,27 @@ public class MatrixMultiplication {
 	    int MATRIX_SIZE = n;
 	    int block_size = 0;
 	    int[][] product = new int[n][n];
-	    if (n == 1024)
+	    if (n == 1024) {
 	    	    block_size = 256;
+	    } else  if (n == 2) {
+	    	block_size = 2;
+	    } else if (n == 4) {
+	    	block_size = 2;
+	    } else if (n == 8) {
+	    	block_size = 4;
+	    } else if (n == 16) {
+	    	block_size = 4;
+	    } else if (n == 32) {
+	    	block_size = 8;
+	    } else if(n == 64) {
+	    	block_size = 16;
+	    } else if (n == 128) {
+	    	block_size = 32;
+	    } else if (n == 256) {
+	    	block_size = 128;
+	    } else {
+	    	block_size = 256;
+	    }
 		for (int k = 0; k < MATRIX_SIZE; k += block_size)
 			for (int j = 0; j < MATRIX_SIZE; j += block_size)
 				for (int i = 0; i < MATRIX_SIZE; ++i)
