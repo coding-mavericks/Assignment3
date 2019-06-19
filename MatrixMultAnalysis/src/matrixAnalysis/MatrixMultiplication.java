@@ -21,53 +21,64 @@ public class MatrixMultiplication {
 		long timeRequiredDC = 0;
 		long timeRequiredstrassen = 0;
 		long timeRequiredClassicThread=0;
-		XYSeriesCollection dataset = new XYSeriesCollection();
+		long timeRequiredOptimized=0;
+		
+		    XYSeriesCollection dataset = new XYSeriesCollection();
 		    XYSeries series1 = new XYSeries("Classic Matrix");
-		    XYSeries series2 = new XYSeries("Block Matrix");
+		   // XYSeries series2 = new XYSeries("Block Matrix");
 		    XYSeries series3 = new XYSeries("Divide and Conquer");
 		    XYSeries series4 = new XYSeries("Strassens Matrix");
 		    XYSeries series5 = new XYSeries("Classic Thread Matrix");
-		/*DefaultCategoryDataset datasetClassic = new DefaultCategoryDataset( );
+		    XYSeries series6 = new XYSeries("Optimized Algorithm");
+		DefaultCategoryDataset datasetClassic = new DefaultCategoryDataset( );
 		DefaultCategoryDataset datasetDC = new DefaultCategoryDataset( );
-		DefaultCategoryDataset datasetStra = new DefaultCategoryDataset( );*/
+		DefaultCategoryDataset datasetStra = new DefaultCategoryDataset( );
 		while(true) {
 		s=(int) Math.pow(2,g);
+			//s=4096;
 			
 		    g=g+1;
 		    int n = s;
 		    int[][] matrixA = m.generateMatrix(n);
 		    int[][] matrixB = m.generateMatrix(n);
-		    int [][] matrixC = new int[n][n];
-		    
-		    
+		    int[][] matrixC = new int[n][n];
+		    boolean flag=MatrixMultiplication.checkInput(matrixA, matrixB);	
+		    if(flag)
+		    {
 		    for (int j = 0; j < NoOfTIMES; j++) {
 		    	
 		    //System.out.println("1");
 			long startTimeClassic  = System.nanoTime();
 		    m.classicMatrixMult(matrixA, matrixB, n);
 			long endTimeClassic   = System.nanoTime();
-			timeRequiredClassic+= endTimeClassic  - startTimeClassic ;
+			timeRequiredClassic+= endTimeClassic  - startTimeClassic ; 
 			
-
+			
+			long startOptimized  = System.nanoTime();
+		    m.optimizedAlgorithm(matrixA, matrixB, n);
+			long endOptimized   = System.nanoTime();
+			timeRequiredOptimized += endOptimized  - startOptimized ;
+            
 	
 
-			
-			long startTimeBlock  = System.nanoTime();
-			m.blockMatrix(matrixA, matrixB, n);
-			long endTimeBlock   = System.nanoTime();			
-			timeRequiredBlock+= endTimeBlock  - startTimeBlock ;
+					/*
+					 * long startTimeBlock = System.nanoTime(); m.blockMatrix(matrixA, matrixB, n);
+					 * long endTimeBlock = System.nanoTime(); timeRequiredBlock+= endTimeBlock -
+					 * startTimeBlock ;
+					 */
 
 
 
 			long startTimeDC  = System.nanoTime();
 			m.divideAndConquerMatrixMult(matrixA, matrixB, n);
 			long endTimeDC  = System.nanoTime();
-			
 			timeRequiredDC += endTimeDC - startTimeDC;
+			
 			//System.out.println("1");
-			long startTimestrassen  = System.nanoTime();
-			m.strassenMatrixMult(matrixA, matrixB, n);
-			long endTimestrassen = System.nanoTime();
+					
+					  long startTimestrassen = System.nanoTime(); m.strassenMatrixMult(matrixA,
+					  matrixB, n); long endTimestrassen = System.nanoTime();
+					 
 			
 			timeRequiredstrassen += endTimestrassen - startTimestrassen;
 
@@ -75,7 +86,7 @@ public class MatrixMultiplication {
 			//System.out.println("1");
 			long startTimeClassicThread = System.nanoTime();
 			m.classicThreadImp(matrixA, matrixB,matrixC, n);
-			long endTimeClassicThread = System.nanoTime();
+			long endTimeClassicThread = System.nanoTime(); 
 			
 			timeRequiredClassicThread += endTimeClassicThread - startTimeClassicThread;
 
@@ -92,16 +103,19 @@ public class MatrixMultiplication {
 		    timeRequiredBlock = timeRequiredBlock / NoOfTIMES/1000000;
 		    timeRequiredDC = timeRequiredDC/NoOfTIMES/ 10000000;
 			timeRequiredstrassen = timeRequiredstrassen/ NoOfTIMES/1000000;
-
+            timeRequiredOptimized = timeRequiredOptimized / NoOfTIMES/1000000;
 			timeRequiredClassicThread = timeRequiredClassicThread/NoOfTIMES/1000000;
 			
 
 			
-			series1.add(n,timeRequiredClassic);
-			series2.add(n,timeRequiredBlock);
-			series3.add(n,timeRequiredDC);
+				
+				  series1.add(n,timeRequiredClassic); 
+				  //series2.add(n,timeRequiredBlock);
+				  series3.add(n,timeRequiredDC);
+				 
 			series4.add(n,timeRequiredstrassen);
-			series5.add(n,timeRequiredClassicThread);
+				 series5.add(n,timeRequiredClassicThread); 
+			series6.add(n,timeRequiredOptimized);
 
 			
 			
@@ -113,34 +127,36 @@ public class MatrixMultiplication {
 							+ n
 							+ ": \n\t Classic Matrix Multiplication time: "
 							+ timeRequiredClassic
-
-							+ " milliseconds.\n\t BlOCK: "
-							+ timeRequiredBlock
-							+ " milliseconds.\n\t Strassen's Matrix Multiplication time: "
-							+ timeRequiredstrassen
-							+ "milliseconds.\n\t Divide and Conquer: "
-							+ timeRequiredDC
-							+ "milliseconds.\n\t Classic with Thread "
-							+ timeRequiredClassicThread
+							+ " milliseconds.\n\t Strassen's Matrix Multiplication time:"
 							
-
-							+ " milliseconds.\n\t Block Matrix Multiplication time: "
-							+ timeRequiredBlock
-							+ "milliseconds.\\n\\t Divide and Conquer Matrix Multiplication time:"
+								/*
+								 * + timeRequiredBlock +
+								 * " milliseconds.\n\t Strassen's Matrix Multiplication time: "
+								 */
+								 
+							+ timeRequiredstrassen
+							+ "milliseconds.\n\t Divide and Conquer time: "
 							+ timeRequiredDC
-							+ "milliseconds.\n\tStrassen's Matrix Multiplication time in milliseconds: "
-							+ timeRequiredstrassen + " nanoseconds.\n");
+							+ "milliseconds.\n\t Classic with Thread time "
+							+ timeRequiredClassicThread
+						
+							
+							+ "milliseconds.\n\t Optimized Matrix Multiplication time : "
+							+ timeRequiredOptimized + "milliseconds");
 
 			
 			
 			
 			
-			if(s == 512) {
-				    dataset.addSeries(series1);
-				    dataset.addSeries(series2);
-				    dataset.addSeries(series3);
+			if(s == 1024) {
+					
+					  dataset.addSeries(series1); 
+					  //dataset.addSeries(series2);
+					  dataset.addSeries(series3);
+					 
 				    dataset.addSeries(series4);
-				    dataset.addSeries(series5);
+					 dataset.addSeries(series5); 
+				    dataset.addSeries(series6);
 				
 			          Chart chart = new Chart(
 				         "Time Taken Vs Size of Matrix" ,
@@ -152,7 +168,10 @@ public class MatrixMultiplication {
 			
 			}
 			
-			
+		    }else {
+		    	System.out.println("Invalid Matrix");
+		    	break;
+		    }
 		}
 		
 		
@@ -163,6 +182,22 @@ public class MatrixMultiplication {
 	
 	
 	
+	private void optimizedAlgorithm(int[][] matrixA, int[][] matrixB, int n) {
+		// TODO Auto-generated method stub
+		if (n <=32) {
+			this.classicMatrixMult(matrixA, matrixB, n);
+		} else if (n <= 4096) {
+			this.blockMatrix(matrixA, matrixB, n);
+		} else {
+			this.strassenMatrixOptimizedMult(matrixA, matrixB, n);
+		}
+		
+	}
+
+
+
+
+
 	private int[][] classicMatrixMult(int[][] matrixA, int[][] matrixB, int n) {
 		
 		
@@ -283,9 +318,12 @@ public class MatrixMultiplication {
 		strassenMatrixMultFormula(matrixA, matrixB, C, n);
 		return C;
 	}
+	
+	
 	public void strassenMatrixMultFormula(int[][] matrixA, int[][] matrixB, int[][] matrixC, int n) {
-
-		if (n == 2) {
+     
+         if(n==2) 
+        {
 			matrixC[0][0] = (matrixA[0][0] * matrixB[0][0]) + (matrixA[0][1] * matrixB[1][0]);
 			matrixC[0][1] = (matrixA[0][0] * matrixB[0][1]) + (matrixA[0][1] * matrixB[1][1]);
 			matrixC[1][0] = (matrixA[1][0] * matrixB[0][0]) + (matrixA[1][1] * matrixB[1][0]);
@@ -343,6 +381,156 @@ public class MatrixMultiplication {
 			combine(C22, matrixC, n / 2, n / 2);
 		}
 	}
+	
+	public int[][] strassenMatrixOptimizedMult(int[][] matrixA, int[][] matrixB, int n) {
+		int[][] C = new int[n][n];
+		strassenMatrixOptimizedMultFormula(matrixA, matrixB, C, n);
+		return C;
+	}
+	
+	
+	public void strassenMatrixOptimizedMultFormula(int[][] matrixA, int[][] matrixB, int[][] matrixC, int n) {
+        if( n < 4096 && n > 32) {
+        	blockMatrix(matrixA, matrixB, n);
+        } 
+        else if(n <= 32 && n >2) 
+        {
+        	classicMatrixMult(matrixA, matrixB, n);
+        } 
+        else if(n==2) 
+        {
+			matrixC[0][0] = (matrixA[0][0] * matrixB[0][0]) + (matrixA[0][1] * matrixB[1][0]);
+			matrixC[0][1] = (matrixA[0][0] * matrixB[0][1]) + (matrixA[0][1] * matrixB[1][1]);
+			matrixC[1][0] = (matrixA[1][0] * matrixB[0][0]) + (matrixA[1][1] * matrixB[1][0]);
+			matrixC[1][1] = (matrixA[1][0] * matrixB[0][1]) + (matrixA[1][1] * matrixB[1][1]);
+		} else {
+			int[][] matrixA11 = new int[n / 2][n / 2];
+			int[][] matrixA12 = new int[n / 2][n / 2];
+			int[][] matrixA21 = new int[n / 2][n / 2];
+			int[][] matrixA22 = new int[n / 2][n / 2];
+			int[][] matrixB11 = new int[n / 2][n / 2];
+			int[][] matrixB12 = new int[n / 2][n / 2];
+			int[][] matrixB21 = new int[n / 2][n / 2];
+			int[][] matrixB22 = new int[n / 2][n / 2];
+
+			int[][] matrixP = new int[n / 2][n / 2];
+			int[][] matrixQ = new int[n / 2][n / 2];
+			int[][] matrixR = new int[n / 2][n / 2];
+			int[][] matrixS = new int[n / 2][n / 2];
+			int[][] matrixT = new int[n / 2][n / 2];
+			int[][] matrixU = new int[n / 2][n / 2];
+			int[][] matrixV = new int[n / 2][n / 2];
+
+			split(matrixA, matrixA11, 0, 0);
+			split(matrixA, matrixA12, 0, n / 2);
+			split(matrixA, matrixA21, n / 2, 0);
+			split(matrixA, matrixA22, n / 2, n / 2);
+			split(matrixB, matrixB11, 0, 0);
+			split(matrixB, matrixB12, 0, n / 2);
+			split(matrixB, matrixB21, n / 2, 0);
+			split(matrixB, matrixB22, n / 2, n / 2);
+
+			strassenMatrixOptimizedMultFormula(addMatrix(matrixA11, matrixA22, n / 2),
+					addMatrix(matrixB11, matrixB22, n / 2), matrixP, n / 2);
+			strassenMatrixOptimizedMultFormula(addMatrix(matrixA21, matrixA22, n / 2), matrixB11, matrixQ, n / 2);
+			strassenMatrixOptimizedMultFormula(matrixA11, subtractMatrix(matrixB12, matrixB22, n / 2), matrixR, n / 2);
+			strassenMatrixOptimizedMultFormula(matrixA22, subtractMatrix(matrixB21, matrixB11, n / 2), matrixS, n / 2);
+			strassenMatrixOptimizedMultFormula(addMatrix(matrixA11, matrixA12, n / 2), matrixB22, matrixT, n / 2);
+			strassenMatrixOptimizedMultFormula(subtractMatrix(matrixA21, matrixA11, n / 2),
+					addMatrix(matrixB11, matrixB12, n / 2), matrixU, n / 2);
+			strassenMatrixOptimizedMultFormula(subtractMatrix(matrixA12, matrixA22, n / 2),
+					addMatrix(matrixB21, matrixB22, n / 2), matrixV, n / 2);
+
+			int[][] C11 = addMatrix(
+					subtractMatrix(addMatrix(matrixP, matrixS, matrixP.length), matrixT, matrixT.length), matrixV,
+					matrixV.length);
+			int[][] C12 = addMatrix(matrixR, matrixT, matrixR.length);
+			int[][] C21 = addMatrix(matrixQ, matrixS, matrixQ.length);
+			int[][] C22 = addMatrix(
+					subtractMatrix(addMatrix(matrixP, matrixR, matrixP.length), matrixQ, matrixQ.length), matrixU,
+					matrixU.length);
+
+			combine(C11, matrixC, 0, 0);
+			combine(C12, matrixC, 0, n / 2);
+			combine(C21, matrixC, n / 2, 0);
+			combine(C22, matrixC, n / 2, n / 2);
+		}
+	}
+	
+	
+	 private static boolean checkInput(int[][] matrixA, int[][] matrixB) 		    
+	    {		
+		    boolean flag=true;		
+	        int p = matrixA.length;		
+	        int q1= matrixB.length;		
+	       		
+	        		
+	        if (p==0 ||q1==0)		
+	        {   flag=false;		
+	        	System.out.println("Matrix A or Matrix B is a Null matrix");		
+	        			
+	        }else{		
+	        int n=p;		
+	        int m=q1;		
+	        while (m>1)		
+	        {		
+	            if (m%2 != 0)		
+	            {		
+	            	flag=false;		
+	            	System.out.println("Matrix B is non-power of (2) matrix");		
+	            			
+	            }		
+	            m/=2;		
+	            		
+	        }		
+	        while (n>1)		
+	        {		
+	            if (n%2 != 0)		
+	            {		
+	            	flag=false;		
+	            	System.out.println("Matrix A is non-power of (2) matrix");		
+	            		
+	            }		
+	            n/=2;		
+	        }		
+	        		
+	       		
+	        if (matrixB.length != p)		
+	        {		
+	        	flag=false;		
+	        	System.out.println("Matrix B and Matrix A are of inconsistent dimensions");		
+	        			
+	        }		
+	        int q = matrixA[0].length;		
+	        int r = matrixB[0].length;		
+	        for (int i=1;i<matrixA.length;i++)		
+	        {		
+	            if ((matrixA[i].length != q))		
+	            {		
+	            	flag=false;		
+	            	System.out.println("Matrix A is inconsistent matrix");		
+	            			
+	            }		
+	            if ((q==0)||(r==0))		
+		        {   flag=false;		
+		            System.out.println("Either Matrix A or Matrix B are Empty.Please enter value in Matrix");		
+		           		
+		        }		
+	            		
+	        }		
+	       		
+	        for (int i=1; i<matrixB.length;i++)		
+	        {		
+	            if (matrixB[i].length != r)		
+	            {		
+	            	flag=false;		
+	            	System.out.println("Matrix B is inconsistent matrix");		
+	            			
+	            }		
+	        }		
+	        }		
+	        return flag;		
+	    }
 	
 	
 	private void split(int[][] initial_Matrix,

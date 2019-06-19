@@ -37,14 +37,14 @@ public class Chart extends JFrame {
 	      super(applicationTitle);
 	      JFreeChart lineChart = ChartFactory.createXYLineChart(
 	         chartTitle,
-	         "Size of Matrix","Time Taken",
+	         "Size of Matrix","Time Taken in ms",
 	         dataset,
 	         PlotOrientation.VERTICAL,
 	         true,true,false);
 	      
 	         
 	      //boolean linechartDC;
-		ChartPanel chartPanel = new ChartPanel( lineChart );
+		  ChartPanel chartPanel = new ChartPanel( lineChart );
 	      chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
 	      setContentPane( chartPanel );
 	   }

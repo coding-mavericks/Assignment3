@@ -6,12 +6,12 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Aditya/Desktop/ServerSimulation/Assignment3/MatrixMultAnalysis/src/jcommon-1.0.23.jar">
+	<classpathentry kind="lib" path="C:/Users/Aditya/Desktop/Matrix Analysis/Assignment3/MatrixMultAnalysis/bin/jcommon-1.0.23.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Aditya/Desktop/ServerSimulation/Assignment3/MatrixMultAnalysis/src/jfreechart-1.0.19.jar">
+	<classpathentry kind="lib" path="C:/Users/Aditya/Desktop/Matrix Analysis/Assignment3/MatrixMultAnalysis/bin/jfreechart-1.0.19.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
