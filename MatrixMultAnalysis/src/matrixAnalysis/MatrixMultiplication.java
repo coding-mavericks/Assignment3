@@ -12,8 +12,8 @@ public class MatrixMultiplication {
 	
 	public static void main(String args[]) {
 		MatrixMultiplication m = new MatrixMultiplication();
-		final int NoOfTIMES = 3;
-		int g = 1;
+		final int NoOfTIMES = 1;
+		int g = 0;
 		int s = 0;
 
 		long timeRequiredClassic= 0;
@@ -42,6 +42,11 @@ public class MatrixMultiplication {
 		    int[][] matrixA = m.generateMatrix(n);
 		    int[][] matrixB = m.generateMatrix(n);
 		    int[][] matrixC = new int[n][n];
+		    if(n==1) {
+		    	matrixC[0][0] = matrixA[0][0] * matrixB[0][0];
+		    	System.out.println(matrixC[0][0]+" is the output and time required is 0");
+		    }
+		    else {
 		    boolean flag=MatrixMultiplication.checkInput(matrixA, matrixB);	
 		    if(flag)
 		    {
@@ -55,7 +60,7 @@ public class MatrixMultiplication {
 			
 			
 			long startOptimized  = System.nanoTime();
-		    m.optimizedAlgorithm(matrixA, matrixB, n);
+		    m.optimizedAlgorithm(matrixA, matrixB,matrixC, n);
 			long endOptimized   = System.nanoTime();
 			timeRequiredOptimized += endOptimized  - startOptimized ;
             
@@ -85,7 +90,11 @@ public class MatrixMultiplication {
 			
 			//System.out.println("1");
 			long startTimeClassicThread = System.nanoTime();
-			m.classicThreadImp(matrixA, matrixB,matrixC, n);
+			if (n < 2048)
+			m.classicThreadImp(matrixA, matrixB,matrixC, n,10);
+			else {
+			m.classicThreadImp(matrixA, matrixB,matrixC, n,1000);
+			}
 			long endTimeClassicThread = System.nanoTime(); 
 			
 			timeRequiredClassicThread += endTimeClassicThread - startTimeClassicThread;
@@ -148,7 +157,7 @@ public class MatrixMultiplication {
 			
 			
 			
-			if(s == 1024) {
+			if(s == 64) {
 					
 					  dataset.addSeries(series1); 
 					  //dataset.addSeries(series2);
@@ -173,6 +182,7 @@ public class MatrixMultiplication {
 		    	break;
 		    }
 		}
+		}
 		
 		
 	
@@ -182,13 +192,17 @@ public class MatrixMultiplication {
 	
 	
 	
-	private void optimizedAlgorithm(int[][] matrixA, int[][] matrixB, int n) {
+	private void optimizedAlgorithm(int[][] matrixA, int[][] matrixB, int[][] matrixC, int n) {
 		// TODO Auto-generated method stub
 		if (n <=32) {
 			this.classicMatrixMult(matrixA, matrixB, n);
-		} else if (n <= 4096) {
+		} else if (n <= 512) {
 			this.blockMatrix(matrixA, matrixB, n);
-		} else {
+		} else if (n <= 2048) {
+			this.classicThreadImp(matrixA, matrixB, matrixC, n, 10);
+		} else if (n <= 4096){
+			this.classicThreadImp(matrixA, matrixB, matrixC, n, 1000);
+		}else {
 			this.strassenMatrixOptimizedMult(matrixA, matrixB, n);
 		}
 		
@@ -390,13 +404,15 @@ public class MatrixMultiplication {
 	
 	
 	public void strassenMatrixOptimizedMultFormula(int[][] matrixA, int[][] matrixB, int[][] matrixC, int n) {
-        if( n < 4096 && n > 32) {
-        	blockMatrix(matrixA, matrixB, n);
-        } 
-        else if(n <= 32 && n >2) 
-        {
-        	classicMatrixMult(matrixA, matrixB, n);
-        } 
+		if (n <=32) {
+			this.classicMatrixMult(matrixA, matrixB, n);
+		} else if (n <= 512) {
+			this.blockMatrix(matrixA, matrixB, n);
+		} else if (n <= 2048) {
+			this.classicThreadImp(matrixA, matrixB, matrixC, n, 10);
+		} else if (n <= 4096){
+			this.classicThreadImp(matrixA, matrixB, matrixC, n, 1000);
+		}
         else if(n==2) 
         {
 			matrixC[0][0] = (matrixA[0][0] * matrixB[0][0]) + (matrixA[0][1] * matrixB[1][0]);
@@ -623,7 +639,7 @@ public class MatrixMultiplication {
 	}
 	
 	
-	public void classicThreadImp(int[][] matrixA, int[][] matrixB, int [][] matrixC, int n)
+	public void classicThreadImp(int[][] matrixA, int[][] matrixB, int [][] matrixC, int n, int threadpool)
 	{
 		//MatrixMultiplication ob = new MatrixMultiplication();
 		
@@ -649,7 +665,7 @@ public class MatrixMultiplication {
 
             try{
 
-            ExecutorService executor = Executors.newFixedThreadPool(10);
+            ExecutorService executor = Executors.newFixedThreadPool(threadpool);
             startTime = System.currentTimeMillis();
             for(int i=0;i<n;i++)
             {
